@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*- #告诉Python解释器，按照UTF-8编码读取源代码
 #!/usr/bin/env python  #告诉Linux/OS X系统，这是一个Python可执行程序，Windows系统会忽略这个注释
+
+import datetime, time
+import functools
+
 # 数据类型：bool int float unicode str None
 # 字符编码
 print ord('A'), chr(65)
@@ -7,7 +11,8 @@ print u'ABC'.encode('utf-8'), 'abc'.decode('utf-8'), u'中文'.encode('utf-8')
 print len(u'abc'), len('abc')
 
 # 格式化
-print  'Age: %s. Gender: %s' % (25, True)
+print 'the num is %d-%d' % (1, 10)
+print 'the num is {0}-{1}'.format(1, 10)
 
 a = 'abc' 
 #a是变量，而'abc'才是字符串对象！
@@ -36,17 +41,17 @@ else:
     print 'adult'
 
 # 循环语句
-sum = 0
+sum1 = 0
 for x in range(101):
-    sum = sum + x
-print sum
+    sum1 = sum1 + x
+print sum1
 
-sum = 0
+sum2 = 0
 n = 99
 while n > 0:
-    sum = sum + n
+    sum2 = sum2 + n
     n = n - 2
-print sum
+print sum2
 
 # dict & set
 # dict的key必须是不可变对象。
@@ -102,10 +107,10 @@ def fact(n): #bad
 L = ['Michael', 'Sarah', 'Tracy', 'Bob', 'Jack']
 print L[0:-1], L[::2], L[-2:-1]
 ## 迭代（Iteration）：通过for ... in循环来遍历str list tuple dict
-# 判断一个对象是否可以迭代
+### 判断一个对象是否可以迭代
 from collections import Iterable
 print isinstance('abc', Iterable)
-# 硬是要取下标
+### 硬是要取下标
 for i, value in enumerate(['A', 'B', 'C']):
     pass
 ## 列表生成式（List Comprehensions）
@@ -117,7 +122,7 @@ print g
 for n in g:
     print n
 
-# 如果函数定义中包含yield关键字，那么这个函数就是一个generator
+### 如果函数定义中包含yield关键字，那么这个函数就是一个generator
 def fib(max):
     n, a, b = 0, 0, 1
     while n < max:
@@ -129,3 +134,106 @@ print fib(6)
 # 函数式编程（请注意多了一个“式”字）——Functional Programming
 # 允许把函数本身作为参数传入另一个函数，还允许返回一个函数！
 # 把函数作为参数传入，这样的函数称为高阶函数，函数式编程就是指这种高度抽象的编程范式。
+
+## 几个常用的高阶函数：map/reduce filter sorted
+### map(函数(一个参数), 序列)，将传入的函数依次作用到序列的每个元素，并把结果作为新的list返回。
+print map(str, range(1,10))
+### reduce(函数(两个参数), 序列)，把结果继续和序列的下一个元素做累积计算
+print sum(range(1,10))
+print reduce(lambda x,y: x+y, range(1,10))
+def my_add(x,y):
+	return x+y
+print reduce(my_add, range(1,10))
+### filter(函数, 序列)，把传入的函数依次作用于每个元素，然后根据返回值是True还是False决定保留还是丢弃该元素
+def not_empty(s):
+    return s and s.strip()
+print filter(not_empty, ['A', '', 'B', None, 'C', '  '])
+### sorted
+#### 通常规定：对于两个元素x和y，如果认为x < y，则返回-1；如果认为x == y，则返回0；如果认为x > y，则返回1
+def cmp_ignore_case(s1, s2):
+    u1 = s1.upper()
+    u2 = s2.upper()
+    if u1 < u2:
+        return -1
+    if u1 > u2:
+        return 1
+    return 0
+print sorted(['bob', 'about', 'Zoo', 'Credit'], cmp_ignore_case)
+
+## 返回函数 --闭包（Closure）
+def count():
+    fs = []
+    for i in range(1, 4):
+        def f():
+             return i*i # not ok, 返回函数不要引用任何循环变量，或者后续会发生变化的变量。
+        fs.append(f)
+    return fs
+f1, f2, f3 = count()
+print f1(), f2(), f3()
+
+def count_zhengjiu(): #硬要引用循环变量怎么办
+	fs = []
+	for i in range(1, 4):
+		def f(j):
+			def g():
+				return j*j
+			return g
+		fs.append(f(i))
+   	return fs
+f1, f2, f3 = count_zhengjiu()
+print f1(), f2(), f3()
+
+## 匿名函数lambda x: x * x
+
+## 装饰器（Decorator）：不改变函数定义，只在代码运行期间动态增加功能的方式，是一个返回函数的高阶函数
+def log(func):
+    def wrapper(*args, **kw):
+        print 'call %s():' % func.__name__
+        return func(*args, **kw)
+    return wrapper
+@log # @语法：把@log放到now()函数的定义处 + 2层嵌套 <==> 执行了语句now = log(now)
+def now():
+    print time.strftime('%Y-%m-%d',time.localtime(time.time()))
+now()
+print now.__name__
+
+def log(text):
+    def decorator(func):
+    	@functools.wraps(func) # 恢复now本身的__name__属性
+        def wrapper(*args, **kw):
+            print '%s %s():' % (text, func.__name__)
+            return func(*args, **kw)
+        return wrapper
+    return decorator
+@log('execute') # 3层嵌套 <==> 执行了语句now = log('execute')(now)
+def now():
+    print time.strftime('%Y-%m-%d',time.localtime(time.time()))
+now()
+print now.__name__
+
+def log(text_begin, text_end):
+	def decorator(func):
+		@functools.wraps(func)
+		def wrapper():
+			print '%s %s():' % (text_begin, func.__name__)
+			def g():
+				return func(*args, **kw)
+			print '%s %s():' % (text_end, func.__name__)
+			return g
+		return wrapper
+	return decorator
+@log('execute_begin', 'execute_end') # 3层嵌套 <==> 执行了语句now = log('execute')(now)
+def now():
+    print time.strftime('%Y-%m-%d',time.localtime(time.time()))
+now()
+
+## 偏函数：把一个函数的某些参数给固定住（也就是设置默认值），返回一个新的函数，调用这个新函数会更简单。
+## 当函数的参数个数太多，需要简化时，使用functools.partial可以创建一个新的函数
+print int('10010', base=2)
+int2 = functools.partial(int, base=2) # <==>def int2(x, base=2): return int(x, base)
+print int2('10010', base=2) # int2('10010', base=2, base=2)
+print int2('10010') # <==> kw = { base: 2 } int('10010', **kw)
+max2 = functools.partial(max, 100)
+print max2(1,2,3) # <==> args = (100, 5, 6, 7) max(*args)
+
+

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from types import MethodType
+import logging
 
 # 多重继承、定制类、元类
 
@@ -110,6 +111,16 @@ class Fib(object):
                     L.append(a)
                 a, b = b, a + b
             return L
+    def __getattr__(self, attr):
+        if attr=='age':
+            return lambda: 25
+        elif attr == 'sex':
+            return 'M'
+        else:
+            return logging.warning('\'Student\' object has no attribute \'%s\'' % attr)
+            # raise AttributeError('\'Student\' object has no attribute \'%s\'' % attr)
+    def __call__(self):
+        print 'call function is:%s' % self.name
 
 for n in Fib():
     print n
@@ -118,3 +129,15 @@ for n in Fib():
 f = Fib()
 print '{0}th element:{1}'.format(11, f[10])
 print 'slice from {0}th to {1}th:{2}'.format(0, 10, f[0:11])
+
+### __getattr__: 按自己的意愿显示获取属性信息失败的提示信息
+print f.age(), f.sex
+print f.name
+
+### __call__: 直接在实例本身上调用, 类似instance()
+if callable(Fib()):
+    f()
+
+## type()函数可以查看一个类型或变量的类型, 又可以创建出新的类型
+
+## metaclass元类: 

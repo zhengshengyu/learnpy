@@ -60,4 +60,3 @@ print [x for x in os.listdir('.') if os.path.isfile(x) and os.path.splitext(x)[1
 # 当前目录以及当前目录的所有子目录下查找文件名包含指定字符串substr的文件，并打印出完整路径
 def search(substr):
 	pass
-	

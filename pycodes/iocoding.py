@@ -22,7 +22,7 @@ with open(_fileReadPath, 'rb') as f: #with语句来会帮我们调用close()方�
     # print f.read()
 	for line in f.readlines():
 	    print line.strip() # 把末尾的'\n'删掉
-
+	    
 ## 写文件：写完一定要调用close()方法时，操作系统才保证把没有写入的数据全部写入磁盘
 _fileWritePath = 'writefile.txt'
 with open(_fileWritePath, 'w') as f:

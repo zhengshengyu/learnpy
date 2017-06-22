@@ -54,3 +54,60 @@ print set([1,2,3,4,3,2,1,0])
 a=set([1,2,3,4])
 b=set([2,4,6,8])
 print a&b, a|b, a^b, a-b #交 并 异或 差
+
+mySets =[]
+for i in xrange(1,10):
+	subSet=set(range(i+5))
+	# print subSet
+	mySets.append(subSet)
+# print mySets
+print reduce(set.union, mySets)
+
+#### heap堆
+from heapq import *
+from random import shuffle
+data = range(10)
+shuffle(data)
+heap=[]
+for n in data:
+	heappush(heap,n)
+heapify(heap)
+print heap
+print range(1,11)
+for x in xrange(1,10):
+	print heappop(heap)
+
+#### deque
+from collections import deque
+q=deque(range(5))
+q.append(5)
+q.appendleft(-1)
+print q
+print q.pop(), q.popleft()
+q.rotate(1)
+print q
+
+#### time
+import time
+print time.asctime(), time.asctime((2017,6,20,23,3,0,1,171,0))
+print time.localtime(time.time()), time.gmtime(time.time())
+print time.mktime(time.localtime(time.time()))
+print time.strptime(time.asctime())
+# print time.time()
+# time.sleep(3)
+# print time.time()
+
+#### shelve
+import shelve
+s=shelve.open('test.dat')
+s['zsy'] = ['z','s','y']
+temp = s['zsy']
+temp.append('whf')
+s['zsy']=temp
+print s['zsy']
+
+#### re
+import re
+pattern = re.compile('[p-y]+')
+print re.match(pattern, 'python'), re.match(pattern, 'hello, python')
+print re.findall(pattern, 'hello, python, ppp')
